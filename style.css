@@ -757,7 +757,10 @@ a {
 .single-page-wrapper {
   position: relative;
   width: 100%;
-  z-index: 2;
+  z-index: 3;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  isolation: isolate;
 }
 
 .portfolio-section {
@@ -2371,8 +2374,8 @@ html, body {
   }
 }
 
-/* 2. Tablets & Mobile Devices (max-width: 860px) */
-@media (max-width: 860px) {
+/* 2. Tablets & Mobile Devices (max-width: 860px) and all touch screens */
+@media (max-width: 1024px), (pointer: coarse), (hover: none) {
   /* On mobile/touch devices, keep reveal elements always visible to avoid blank/black screen gaps during scrolling */
   .reveal,
   .reveal.from-left,
@@ -2381,7 +2384,11 @@ html, body {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+    visibility: visible !important;
   }
+}
+
+@media (max-width: 860px) {
 
   .ambient-glow.glow-1,
   .ambient-glow.glow-2 {
@@ -2487,7 +2494,7 @@ html, body {
      HERO SECTION MOBILE
      ========================================================================= */
   .hero-section {
-    min-height: 100dvh;
+    min-height: 100svh;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -2496,13 +2503,21 @@ html, body {
     padding-bottom: max(12px, var(--sab));
   }
   .hero-layout {
-    min-height: calc(100dvh - 65px - var(--sat) - var(--sab));
+    min-height: calc(100svh - 65px - var(--sat) - var(--sab));
+    min-height: calc(100vh - 65px - var(--sat) - var(--sab));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
     overflow: hidden;
     padding: 8px 16px 14px;
+  }
+
+  /* Guarantee hero elements never stay hidden on mobile */
+  .animate-fade-down,
+  .animate-fade-up,
+  .animate-fade-right {
+    opacity: 1 !important;
   }
 
   /* Scaled backdrop name */

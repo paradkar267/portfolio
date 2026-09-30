@@ -351,9 +351,18 @@ function handleContactSubmit() {
 // SCROLL REVEAL — IntersectionObserver (no library)
 // =============================================================
 (function () {
-  // Mobile / touch devices: immediately reveal all elements so users never scroll into blank/black voids
-  if (window.innerWidth <= 860 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0) {
+  function revealAllImmediately() {
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  }
+
+  // Mobile / touch devices: immediately reveal all elements so users never scroll into blank/black voids
+  const isTouchOrMobile = window.innerWidth <= 1024 || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (isTouchOrMobile) {
+    revealAllImmediately();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', revealAllImmediately);
+    }
+    window.addEventListener('load', revealAllImmediately);
     return;
   }
 
@@ -364,7 +373,7 @@ function handleContactSubmit() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.05, rootMargin: '0px 0px 60px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 100px 0px' });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 })();
