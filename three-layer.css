@@ -1,6 +1,0 @@
-/* 3D layer: sits above section backgrounds (z 0), below page content (z 3) */
-#three-layer{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
-.work-main-showcase-grid article{will-change:transform}
-.work-main-showcase-grid article.tilting{transition:transform .12s ease-out!important}
-.hero-section .section-bg-graphic,.giant-name-backdrop,.hero-portrait-img{will-change:translate}
-@media (prefers-reduced-motion:reduce){#three-layer{opacity:.8}}
