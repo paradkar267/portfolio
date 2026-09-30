@@ -351,6 +351,12 @@ function handleContactSubmit() {
 // SCROLL REVEAL — IntersectionObserver (no library)
 // =============================================================
 (function () {
+  // Mobile / touch devices: immediately reveal all elements so users never scroll into blank/black voids
+  if (window.innerWidth <= 860 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -358,7 +364,7 @@ function handleContactSubmit() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.05, rootMargin: '0px 0px 60px 0px' });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 })();
