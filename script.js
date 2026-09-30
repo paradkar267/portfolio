@@ -57,19 +57,38 @@ document.addEventListener('DOMContentLoaded', () => {
   updateActiveNavOnScroll();
 
   // 2. Smooth Click Scrolling for Nav Links & Drawer Auto-Close
+  function closeMobileDrawer() {
+    if (mobileDrawer) {
+      mobileDrawer.classList.remove('open');
+      mobileDrawer.setAttribute('aria-hidden', 'true');
+    }
+    if (mobileToggleBtn) {
+      mobileToggleBtn.classList.remove('open');
+    }
+    document.body.classList.remove('drawer-open');
+    document.body.style.overflow = '';
+  }
+
+  function openMobileDrawer() {
+    if (mobileDrawer) {
+      mobileDrawer.classList.add('open');
+      mobileDrawer.setAttribute('aria-hidden', 'false');
+    }
+    if (mobileToggleBtn) {
+      mobileToggleBtn.classList.add('open');
+    }
+    document.body.classList.add('drawer-open');
+    document.body.style.overflow = 'hidden';
+  }
+
   function handleNavClick(e) {
     const targetId = this.getAttribute('href');
     if (targetId && targetId.startsWith('#')) {
       e.preventDefault();
       const targetEl = document.querySelector(targetId);
+      closeMobileDrawer();
       if (targetEl) {
         targetEl.scrollIntoView({ behavior: 'smooth' });
-      }
-      if (mobileDrawer) {
-        mobileDrawer.classList.remove('open');
-      }
-      if (mobileToggleBtn) {
-        mobileToggleBtn.classList.remove('open');
       }
     }
   }
@@ -77,18 +96,37 @@ document.addEventListener('DOMContentLoaded', () => {
   navLinks.forEach(link => link.addEventListener('click', handleNavClick));
   mobileLinks.forEach(link => link.addEventListener('click', handleNavClick));
 
-  // 3. Mobile Toggle Drawer
+  // 3. Mobile Toggle Drawer & Overlay Handlers
+  const mobileDrawerClose = document.getElementById('mobileDrawerClose');
+  const mobileDrawerBackdrop = document.getElementById('mobileDrawerBackdrop');
+
   if (mobileToggleBtn && mobileDrawer) {
     mobileToggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      mobileDrawer.classList.toggle('open');
-      mobileToggleBtn.classList.toggle('open');
+      const isOpen = mobileDrawer.classList.contains('open');
+      if (isOpen) {
+        closeMobileDrawer();
+      } else {
+        openMobileDrawer();
+      }
     });
 
-    document.addEventListener('click', (e) => {
-      if (!mobileDrawer.contains(e.target) && !mobileToggleBtn.contains(e.target)) {
-        mobileDrawer.classList.remove('open');
-        mobileToggleBtn.classList.remove('open');
+    if (mobileDrawerClose) {
+      mobileDrawerClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMobileDrawer();
+      });
+    }
+
+    if (mobileDrawerBackdrop) {
+      mobileDrawerBackdrop.addEventListener('click', () => {
+        closeMobileDrawer();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileDrawer.classList.contains('open')) {
+        closeMobileDrawer();
       }
     });
   }
@@ -206,64 +244,64 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!data || !modal || !modalBody) return;
 
     modalBody.innerHTML = `
-      <div style="width: 100%; height: 280px; overflow: hidden; background: #121915; position: relative;">
-        <img src="${data.image}" alt="${data.title}" style="width: 100%; height: 100%; object-fit: cover;">
+      <div class="modal-project-img-box">
+        <img src="${data.image}" alt="${data.title}" class="modal-project-img">
         ${data.credentials ? `
-          <div style="position: absolute; bottom: 14px; left: 16px; background: rgba(12, 16, 14, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(201, 251, 85, 0.35); padding: 5px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px;">
-            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #C9FB55; box-shadow: 0 0 10px #C9FB55;"></span>
-            <span style="font-family: var(--font-mono); font-size: 11px; color: #C9FB55; font-weight: 700; letter-spacing: 0.5px;">Owner Vault Demo Access</span>
+          <div class="modal-vault-floating-badge">
+            <span class="vault-pulse-dot"></span>
+            <span class="vault-floating-text">Owner Vault Demo Access</span>
           </div>
         ` : ''}
       </div>
-      <div style="padding: 24px 28px 30px;">
-        <span style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; color: var(--lime-accent); font-weight: 700; text-transform: uppercase;">${data.tag}</span>
-        <h2 style="font-size: 24px; font-weight: 800; color: var(--text-white); margin: 6px 0 12px;">${data.title}</h2>
-        <p style="color: #adb6b0; font-size: 14.5px; line-height: 1.6; margin-bottom: 20px;">${data.description}</p>
+      <div class="modal-project-content">
+        <span class="modal-project-tag">${data.tag}</span>
+        <h2 class="modal-project-title">${data.title}</h2>
+        <p class="modal-project-desc">${data.description}</p>
         
-        <div style="margin-bottom: 20px;">
-          <h4 style="font-size: 13px; text-transform: uppercase; color: #8c9790; margin-bottom: 8px; letter-spacing: 1px; font-family: var(--font-mono);">Key Capabilities</h4>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; margin: 0;">
-            ${data.features.map(f => `<li style="font-size: 13.5px; color: #d1dad4; display: flex; align-items: center; gap: 8px;"><span style="color: #C9FB55; font-weight: bold;">✓</span> ${f}</li>`).join('')}
+        <div class="modal-capabilities-box">
+          <h4 class="modal-section-subtitle">Key Capabilities</h4>
+          <ul class="modal-features-list">
+            ${data.features.map(f => `<li><span class="lime-check">&#10003;</span> ${f}</li>`).join('')}
           </ul>
         </div>
 
         ${data.credentials ? `
-          <div style="margin: 20px 0 24px; background: linear-gradient(135deg, rgba(201, 251, 85, 0.08) 0%, rgba(13, 20, 16, 0.95) 100%); border: 1px solid rgba(201, 251, 85, 0.35); border-radius: 12px; padding: 18px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 15px;">🔐</span>
-                <span style="font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 1.2px; color: #C9FB55; font-weight: 700;">${data.credentials.badge}</span>
+          <div class="modal-vault-box">
+            <div class="modal-vault-header">
+              <div class="modal-vault-header-title">
+                <span class="vault-key-icon">&#128272;</span>
+                <span class="vault-title-text">${data.credentials.badge}</span>
               </div>
-              <span style="font-size: 11px; color: #82958a; font-family: var(--font-mono); background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px;">Public Demo Role</span>
+              <span class="modal-vault-role-pill">Public Demo Role</span>
             </div>
-            <p style="font-size: 13px; color: #c4cdc7; margin: 0 0 14px; line-height: 1.5;">${data.credentials.note}</p>
+            <p class="modal-vault-note">${data.credentials.note}</p>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;">
-              <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(201, 251, 85, 0.18); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <div style="overflow: hidden;">
-                  <div style="font-size: 10px; text-transform: uppercase; color: #82958a; font-family: var(--font-mono); letter-spacing: 0.8px; margin-bottom: 2px;">Email (Owner Login)</div>
-                  <div style="font-size: 13px; color: #ffffff; font-weight: 600; font-family: var(--font-mono); word-break: break-all;">${data.credentials.email}</div>
+            <div class="modal-vault-grid">
+              <div class="modal-vault-card">
+                <div class="vault-card-info">
+                  <div class="vault-card-label">Email (Owner Login)</div>
+                  <div class="vault-card-value">${data.credentials.email}</div>
                 </div>
-                <button type="button" onclick="copyModalCred('${data.credentials.email}', this)" style="background: rgba(201, 251, 85, 0.15); border: 1px solid rgba(201, 251, 85, 0.35); color: #C9FB55; font-size: 11px; font-weight: 600; font-family: var(--font-mono); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">Copy</button>
+                <button type="button" class="btn-copy-cred" onclick="copyModalCred('${data.credentials.email}', this)">Copy</button>
               </div>
 
-              <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(201, 251, 85, 0.18); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <div style="overflow: hidden;">
-                  <div style="font-size: 10px; text-transform: uppercase; color: #82958a; font-family: var(--font-mono); letter-spacing: 0.8px; margin-bottom: 2px;">Password</div>
-                  <div style="font-size: 13px; color: #ffffff; font-weight: 600; font-family: var(--font-mono); letter-spacing: 1px;">${data.credentials.password}</div>
+              <div class="modal-vault-card">
+                <div class="vault-card-info">
+                  <div class="vault-card-label">Password</div>
+                  <div class="vault-card-value">${data.credentials.password}</div>
                 </div>
-                <button type="button" onclick="copyModalCred('${data.credentials.password}', this)" style="background: rgba(201, 251, 85, 0.15); border: 1px solid rgba(201, 251, 85, 0.35); color: #C9FB55; font-size: 11px; font-weight: 600; font-family: var(--font-mono); padding: 5px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">Copy</button>
+                <button type="button" class="btn-copy-cred" onclick="copyModalCred('${data.credentials.password}', this)">Copy</button>
               </div>
             </div>
-            <div style="margin-top: 12px; font-size: 11.5px; color: #8c9790; display: flex; align-items: center; gap: 6px;">
-              <span style="color: #C9FB55;">💡</span> Click <strong>Visit Live Website ↗</strong> below, go to Login, and use these credentials to access the Owner's Vault.
+            <div class="modal-vault-hint">
+              <span class="hint-bulb">&#128161;</span> Click <strong>Visit Live Website &nearr;</strong> below, go to Login, and use these credentials to access the Owner's Vault.
             </div>
           </div>
         ` : ''}
 
-        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-          <a href="${data.liveUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary">Visit Live Website ↗</a>
-          <a href="#contact" class="btn-secondary" onclick="closeProjectModal()">Discuss Similar Project ↗</a>
+        <div class="modal-actions-row">
+          <a href="${data.liveUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary modal-action-btn">Visit Live Website &nearr;</a>
+          <a href="#contact" class="btn-secondary modal-action-btn" onclick="closeProjectModal()">Discuss Similar Project &nearr;</a>
         </div>
       </div>
     `;
